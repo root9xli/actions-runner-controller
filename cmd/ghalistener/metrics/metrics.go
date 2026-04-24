@@ -496,7 +496,13 @@ func (e *exporter) RecordJobCompleted(msg *scaleset.JobCompleted) {
 	l := e.completedJobLabels(msg)
 	e.incCounter(MetricCompletedJobsTotal, l)
 
-	executionDuration := msg.FinishTime.Unix() - msg.RunnerAssignTime.Unix()
+	// If the runner assign time is not set, it means that the job is never picked up by the runner.
+	// Set execution duration to 0, to observe that the job is completed without being executed.
+	var executionDuration int64
+	if !msg.RunnerAssignTime.IsZero() {
+		executionDuration = msg.FinishTime.Unix() - msg.RunnerAssignTime.Unix()
+	}
+
 	e.observeHistogram(MetricJobExecutionDurationSeconds, l, float64(executionDuration))
 }
 
