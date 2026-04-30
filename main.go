@@ -56,7 +56,8 @@ func main() {
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&namespace, "namespace", "", "The namespace to watch for resources. Defaults to all namespaces.")
-	flag.StringVar(&syncPeriod, "sync-period", "10m", "The minimum interval at which watched resources are reconciled.")
+	// Reduced sync period from 10m to 5m for more responsive reconciliation in my dev cluster
+	flag.StringVar(&syncPeriod, "sync-period", "5m", "The minimum interval at which watched resources are reconciled.")
 
 	opts := zap.Options{
 		Development: true,
@@ -91,17 +92,4 @@ func main() {
 
 	setupLog.Info("starting manager", "version", version())
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "problem running manager")
-		os.Exit(1)
-	}
-}
-
-// version returns the current version of the controller.
-// This is typically injected at build time via ldflags.
-func version() string {
-	v := os.Getenv("CONTROLLER_VERSION")
-	if v == "" {
-		return fmt.Sprintf("dev")
-	}
-	return v
-}
+		setup
